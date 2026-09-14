@@ -54,7 +54,8 @@ reasoning as `vibe_ml.labels.MOOD_TO_DERIVED`:
   `recommendation_engine.genres.MOOD_TO_GENRES` (e.g. `sad` → `["acoustic",
   "singer-songwriter", "sad"]`, `angry` → `["metal", "punk", "hard-rock"]`).
   A user-supplied `preferences["genres"]` fully overrides this.
-- `vibe_tags → keywords`: passed straight through.
+- `vibe_tags → keywords`: passed straight through. (Not every provider can
+  use this — see Jamendo's limitation below.)
 - `energy`/`valence → target_energy`/`target_valence`: mapped to 0–1
   floats (`ENERGY_TO_TARGET`, `VALENCE_TO_TARGET` in the same module) —
   the shape most streaming APIs' recommendation endpoints expect.
@@ -77,8 +78,28 @@ in the search response itself. `apps/api` picks between them via
 `MUSIC_PROVIDER` (`.env.example`), falling back to mock whenever
 `JAMENDO_CLIENT_ID` isn't set rather than hard-failing.
 
-**Known gap:** Jamendo's search API has no audio-features endpoint, so
-`MusicQuery.target_energy`/`target_valence` aren't used by
-`JamendoProvider` — only `seed_genres` and `keywords` map to real query
-parameters (`tags` and `search`). A provider with richer search (or a
-post-filter step) could use them later without changing the engine.
+**Verified against the real API, not just mocked tests** — and two things
+turned out to work differently than the obvious first implementation
+assumed (see the module docstring in `jamendo_provider.py` for the full
+detail):
+
+- **`tags` is a single-genre filter, not an OR list.** Sending
+  `query.seed_genres` as one comma-joined string requires a track to
+  match *all* of them at once, which is so narrow it reliably returns
+  nothing. `JamendoProvider` instead tries each genre in `seed_genres` as
+  its own request, falling through to the next on an empty result, then
+  to no genre filter at all as a last resort.
+- **Jamendo's `search` does literal text matching** against track/artist
+  names — it's not a semantic filter, so `query.keywords` (mood words
+  like "calm", "energetic") were never a meaningful fit for it and
+  aren't sent. Only `seed_genres` maps to a real Jamendo parameter.
+  `target_energy`/`target_valence` still have no equivalent at all (no
+  audio-features endpoint like Spotify's) — a provider with richer search
+  (or a post-filter step) could use them later without changing the
+  engine.
+- **The API itself is flaky at the backend level**: the exact same
+  single-tag request, repeated back to back with nothing changed, returns
+  a full page of results about half the time and zero the other half.
+  `JamendoProvider` retries each genre a couple of times before moving on
+  — without that, the recommendation would intermittently come back empty
+  for no reason a user could understand.
