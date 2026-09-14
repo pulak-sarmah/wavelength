@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vibe-ml"
+version = "0.1.0"
+description = "Text -> structured vibe profile classifier for Wavelength."
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "joblib",
+    "torch",
+    "transformers",
+    "datasets",
+    "accelerate",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

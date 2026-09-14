@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+sqlalchemy
+python-multipart   # for optional photo upload
+
+# local packages
+-e ../../ml
+-e ../../recommendation
+
+# dev/test
+pytest
+httpx

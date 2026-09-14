@@ -1,0 +1,5 @@
+-e ../ml   # for the VibePrediction type
+httpx      # JamendoProvider
+
+# Dev/test
+pytest

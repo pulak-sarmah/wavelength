@@ -1,0 +1,9 @@
+{
+  "name": "wavelength",
+  "private": true,
+  "description": "Monorepo root. Only the TS/JS workspaces (apps/web, packages/shared) live under npm workspaces — Python services (apps/api, ml, recommendation) are managed independently.",
+  "workspaces": [
+    "apps/web",
+    "packages/*"
+  ]
+}

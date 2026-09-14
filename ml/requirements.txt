@@ -1,0 +1,18 @@
+# Baseline (classical NLP) stage — CPU-friendly, fast sanity-check pipeline.
+numpy
+pandas
+scikit-learn
+joblib
+matplotlib
+
+# Transformer stage — fine-tuning on Apple Silicon via PyTorch MPS.
+# (Assumes PyTorch is already installed with Metal support in your conda
+# env; re-run `pip install torch` there only if it isn't.)
+torch
+transformers
+datasets
+accelerate
+
+# Dev/test
+pytest
+jupyterlab
